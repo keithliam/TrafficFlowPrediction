@@ -8,6 +8,7 @@ import pandas as pd
 from data.data import process_data
 from keras.models import load_model
 from keras.utils.vis_utils import plot_model
+from datetime import datetime
 import sklearn.metrics as metrics
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -72,8 +73,7 @@ def plot_results(y_true, y_preds, names):
         names: List, Method names.
     """
     d = '2016-3-4 00:00'
-    x = pd.date_range(d, periods=288, freq='5min')
-
+    x = pd.date_range(d, periods=len(y_true), freq=str(round(24 / len(y_true), 2)) + 'H')
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -81,6 +81,7 @@ def plot_results(y_true, y_preds, names):
     for name, y_pred in zip(names, y_preds):
         ax.plot(x, y_pred, label=name)
 
+    plt.xticks(pd.date_range(d, periods=8, freq='3H'))
     plt.legend()
     plt.grid(True)
     plt.xlabel('Time of Day')
@@ -116,11 +117,11 @@ def main():
         plot_model(model, to_file=file, show_shapes=True)
         predicted = model.predict(X_test)
         predicted = scaler.inverse_transform(predicted.reshape(-1, 1)).reshape(1, -1)[0]
-        y_preds.append(predicted[:288])
+        y_preds.append(predicted[: 33])
         print(name)
         eva_regress(y_test, predicted)
 
-    plot_results(y_test[: 288], y_preds, names)
+    plot_results(y_test[: 33], y_preds, names)
 
 
 if __name__ == '__main__':
